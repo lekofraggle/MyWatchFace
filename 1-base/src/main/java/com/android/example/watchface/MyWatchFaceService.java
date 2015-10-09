@@ -96,6 +96,8 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
         //Define the ticks
         private Paint mTickPaint;
 
+        private ClockNumbers mClockNumbers;
+
         private boolean mAmbient;
 
         private Bitmap mBackgroundBitmap;
@@ -274,6 +276,7 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             mTime.setToNow();
+            mClockNumbers.draw(canvas);
 
             // Draw the background.
             if (mAmbient && (mLowBitAmbient || mBurnInProtection)) {
@@ -330,8 +333,6 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
                 canvas.drawLine(cx + x1, cy + y1, cx + x2,
                         cy + y2, mTickPaint);
             }
-
-            // draw numbers
 
             if (!mAmbient) {
                 canvas.rotate(secondsRotation - minutesRotation, mCenterX, mCenterY);
