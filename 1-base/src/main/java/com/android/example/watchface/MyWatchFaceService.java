@@ -27,7 +27,9 @@ import android.graphics.Color;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -96,6 +98,7 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
         //Define the ticks
         private Paint mTickPaint;
 
+        private Paint mClockPaint;
         private ClockNumbers mClockNumbers;
 
         private boolean mAmbient;
@@ -161,6 +164,13 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
             mHandPaint.setColor(Color.WHITE);
             mHandPaint.setStrokeWidth(STROKE_WIDTH);
             mHandPaint.setAntiAlias(true);
+            mClockPaint = new Paint();
+            mClockPaint.setColor(Color.WHITE);
+            mClockPaint.setAntiAlias(true);
+            mClockPaint.setTextSize(12);
+            mClockPaint.setTextAlign(Paint.Align.CENTER);
+            mClockPaint.setTypeface(Typeface.SANS_SERIF);
+            mClockNumbers = new ClockNumbers(mClockPaint, new Point(160, 160), 150);
 
 
 
@@ -276,7 +286,6 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             mTime.setToNow();
-            mClockNumbers.draw(canvas);
 
             // Draw the background.
             if (mAmbient && (mLowBitAmbient || mBurnInProtection)) {
@@ -297,14 +306,10 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
             final float hourHandOffset = mTime.minute / 2f;
             final float hoursRotation = (mTime.hour * 30) + hourHandOffset;
 
-            // save the canvas state before we begin to rotate it
-            canvas.save();
+            // Draw Numbers
+            mClockNumbers.draw(canvas);
 
-            canvas.rotate(hoursRotation, mCenterX, mCenterY);
-            drawHand(canvas, mHourHandLength);
-
-            canvas.rotate(minutesRotation - hoursRotation, mCenterX, mCenterY);
-            drawHand(canvas, mMinuteHandLength);
+            //Draw Ticks
 
             int w = bounds.width(), h = bounds.height();
             float cx = w / 2.0f, cy = h / 2.0f;
@@ -312,12 +317,6 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
             double sinVal = 0, cosVal = 0, angle = 0;
             float length1 = 0, length2 = 0;
             float x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-
-            /*
-             * Make sure the "seconds" hand is drawn only when we are in interactive mode.
-             * Otherwise we only update the watch face once a minute.
-             */
-            // draw ticks
             length1 = cx - 25;
             length2 = cx;
             for (int i = 0; i < 60; i++) {
@@ -333,6 +332,21 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
                 canvas.drawLine(cx + x1, cy + y1, cx + x2,
                         cy + y2, mTickPaint);
             }
+
+            // save the canvas state before we begin to rotate it
+            canvas.save();
+
+            canvas.rotate(hoursRotation, mCenterX, mCenterY);
+            drawHand(canvas, mHourHandLength);
+
+            canvas.rotate(minutesRotation - hoursRotation, mCenterX, mCenterY);
+            drawHand(canvas, mMinuteHandLength);
+
+            /*
+             * Make sure the "seconds" hand is drawn only when we are in interactive mode.
+             * Otherwise we only update the watch face once a minute.
+             */
+
 
             if (!mAmbient) {
                 canvas.rotate(secondsRotation - minutesRotation, mCenterX, mCenterY);
