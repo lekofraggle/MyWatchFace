@@ -20,7 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
+//import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -35,23 +35,23 @@ import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
+//import android.preference.PreferenceManager;
 import android.support.v7.graphics.Palette;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.Time;
 import android.view.SurfaceHolder;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.Wearable;
+//import com.google.android.gms.common.ConnectionResult;
+//import com.google.android.gms.common.api.GoogleApiClient;
+//import com.google.android.gms.wearable.Wearable;
 
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
+//import android.hardware.Sensor;
+//import android.hardware.SensorEvent;
+//import android.hardware.SensorEventListener;
+//import android.hardware.SensorManager;
 
 /**
  * Analog watch face with a ticking second hand. In ambient mode, the second hand isn't shown. On
@@ -71,9 +71,10 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
         return new Engine();
     }
 
-    private class Engine extends CanvasWatchFaceService.Engine {
-
-        /* Handler to update the time once a second in interactive mode. */
+    private class Engine extends CanvasWatchFaceService.Engine
+            /*implements SensorEventListener*/ {
+        /* Handler to update the time once a second in interactimplements
+            SensorEventListener ive mode. */
         private final Handler mUpdateTimeHandler = new Handler() {
             @Override
             public void handleMessage(Message message) {
@@ -116,6 +117,9 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
         private static final float SHADOW_RADIUS=6.f;
 
         private Time mTime;
+        //private SensorManager mSensorManager;
+        //private Sensor mStepSensor;
+
 
         private Paint mBackgroundPaint;
         private Paint mHandPaint;
@@ -134,11 +138,13 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
         private float mMinuteHandLength;
         private float mSecondHandLength;
         //Watch Battery
-        String batteryPercentage = "";
-        Paint BatteryPercentagePaint;
+        private String batteryPercentage = "";
+        private Paint BatteryPercentagePaint;
         //Watch Battery icon
 
         private Paint mStepPaint;
+
+        private Paint mDate;
 
 
 
@@ -155,12 +161,13 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
 
         private int mWidth;
         private int mHeight;
-        private int mWatchHandColor;
-        private int mWatchHandShadowColor;
+        // private int mWatchHandColor;
+        //private int mWatchHandShadowColor;
         private float mCenterX;
         private float mCenterY;
         private float mScale=1;
         private Rect mCardBounds = new Rect();
+
 
 
 
@@ -172,12 +179,14 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
 
             setWatchFaceStyle(new WatchFaceStyle.Builder(MyWatchFaceService.this)
                     .setCardPeekMode(WatchFaceStyle.PEEK_MODE_SHORT)
+                    .setPeekOpacityMode(WatchFaceStyle.PEEK_OPACITY_MODE_TRANSLUCENT)
                     .setBackgroundVisibility(WatchFaceStyle.BACKGROUND_VISIBILITY_INTERRUPTIVE)
                     .setShowSystemUiTime(false)
                     .build());
 
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor(Color.BLACK);
+
 
             final int backgroundResId = R.drawable.custom_background;
 
@@ -213,7 +222,27 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
             BatteryPercentagePaint.setAntiAlias(true);
             BatteryPercentagePaint.setTextSize(15);
 
-           // mStepPaint = createTextPaint(INTERACTIVE_DIGITS_COLOR);
+            mDate = new Paint();
+            mDate.setColor(Color.WHITE);
+            mDate.setStrokeWidth(6.f);
+            mDate.setAntiAlias(true);
+            mDate.setTextSize(15);
+
+            /**
+             * Step counter text
+             */
+            mStepPaint = new Paint();
+            mStepPaint.setColor(Color.WHITE);
+            mStepPaint.setStrokeWidth(6.f);
+            mStepPaint.setAntiAlias(true);
+            mStepPaint.setTextSize(15);
+
+            /**mSensorManager = ((SensorManager)getSystemService(SENSOR_SERVICE));
+             mStepSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+
+             if (mStepSensor != null) {
+             mSensorManager.registerListener(this,mStepSensor,SensorManager.SENSOR_DELAY_NORMAL);
+             }*/
 
 
             /*
@@ -226,25 +255,25 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
                      * so we need to check that we have one.
                      */
                     /**if (palette != null) {
-                        mWatchHandColor = palette.getVibrantColor(Color.WHITE);
-                        mWatchHandShadowColor = palette.getDarkMutedColor(Color.BLACK);
-                        setWatchHandColor();
-                            }*/
-                        }
-                    });
+                     mWatchHandColor = palette.getVibrantColor(Color.WHITE);
+                     mWatchHandShadowColor = palette.getDarkMutedColor(Color.BLACK);
+                     setWatchHandColor();
+                     }*/
+                }
+            });
 
             mTime = new Time();
         }
-     // implement custom color based on watchhand color
-        private void setWatchHandColor(){
-            if (mAmbient){
-                mHandPaint.setColor(Color.WHITE);
-                mHandPaint.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
-            } else {
-                mHandPaint.setColor(mWatchHandColor);
-                mHandPaint.setShadowLayer(SHADOW_RADIUS, 0, 0, mWatchHandShadowColor);
-            }
-        }
+        // implement custom color based on watchhand color
+        /** private void setWatchHandColor(){
+         if (mAmbient){
+         mHandPaint.setColor(Color.WHITE);
+         mHandPaint.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
+         } else {
+         mHandPaint.setColor(mWatchHandColor);
+         mHandPaint.setShadowLayer(SHADOW_RADIUS, 0, 0, mWatchHandShadowColor);
+         }
+         }   */
 
         @Override
         public void onDestroy() {
@@ -329,8 +358,8 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
         public void onDraw(Canvas canvas, Rect bounds) {
             mTime.setToNow();
 
-           // int width = bounds.width();
-           // int height = bounds.height();
+            // int width = bounds.width();
+            // int height = bounds.height();
 
             // Draw the background.
             if (mAmbient && (mLowBitAmbient || mBurnInProtection)) {
@@ -358,48 +387,68 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
 
 
             //Tick Draw from codingfury
-           /** float innerTickRadius = mCenterX;
-             for (int tickIndex = 0; tickIndex < 12; tickIndex++)
+            /**float innerTickRadius = mCenterX - 30;
+             for (int i = 0; i < 60; i++)
              {
-             float tickRot = (float) (tickIndex * Math.PI * 2 / 12);
+             float tickRot = (float) (i * Math.PI * 2 / 60);
              float innerX = (float) Math.sin(tickRot) * innerTickRadius;
              float innerY = (float) -Math.cos(tickRot) * innerTickRadius;
-             float outerX = (float) Math.sin(tickRot) * mCenterX;
-             float outerY = (float) -Math.cos(tickRot) * mCenterX;
+             float outerX = (float) Math.sin(tickRot) * (mCenterX - 20);
+             float outerY = (float) -Math.cos(tickRot) * (mCenterX - 20);
              canvas.drawLine(mCenterX + innerX, mCenterY + innerY, mCenterX + outerX, mCenterY + outerY, mTickPaint);
              }*/
 
-            // Draw the tick marks complicated like round
-             int w = bounds.width(), h = bounds.height();
-             float cx = w / 2.0f, cy = h / 2.0f;
-
-             double sinVal = 0, cosVal = 0, angle = 0;
-             float length1 = 0, length2 = 0;
-             float x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-             length1 = cx - 40;
-             length2 = cx - 15;
-             for (int i = 0; i < 60; i++) {
-             angle = (i * Math.PI * 2 / 60);
-             sinVal = Math.sin(angle);
-             cosVal = Math.cos(angle);
-             float len = (i % 5 == 0) ? length1 :
-             (length1 + 15);
-             x1 = (float) (sinVal * len);
-             y1 = (float) (-cosVal * len);
-             x2 = (float) (sinVal * length2);
-             y2 = (float) (-cosVal * length2);
-             canvas.drawLine(cx + x1, cy + y1, cx + x2,
-             cy + y2, mTickPaint);
+            //draw square minor marks
+            /**int w = bounds.width();
+             if(!mAmbient || (!mBurnInProtection && !mLowBitAmbient)) {
+             canvas.save();
+             for (int i = 0; i < 12; ++i) {
+             if (i % 900 != 0) {
+             //draw a line wider than the screen to ensure it extends to the
+             //diagonals of a square watch face
+             canvas.drawLine(-100, mCenterY, w + 100, mCenterY, mTickPaint);
              }
+             canvas.rotate (360f, mCenterX, mCenterY);
+             }
+             canvas.restore();
+             }*/
+
+            //Draw the tick marks complicated like round
+            int w = bounds.width(), h = bounds.height();
+            float cx = w / 2.0f, cy = h / 2.0f;
+
+            double sinVal, cosVal, angle ;
+            float length1, length2 ;
+            float x1, y1, x2, y2 ;
+            length1 = cx - 40;
+            length2 = cx - 15;
+            for (int i = 0; i < 60; i++) {
+                angle = (i * Math.PI * 2 / 60);
+                sinVal = Math.sin(angle);
+                cosVal = Math.cos(angle);
+                float len = (i % 5 == 0) ? length1 :
+                        (length1 + 15);
+                x1 = (float) (sinVal * len);
+                y1 = (float) (-cosVal * len);
+                x2 = (float) (sinVal * length2);
+                y2 = (float) (-cosVal * length2);
+                canvas.drawLine(cx + x1, cy + y1, cx + x2,
+                        cy + y2, mTickPaint);
+            }
 
             //Square Ticks?
-            /**for (int i = 0; i < 24; ++i) {
-                if (i % 3 != 0) {
-                    canvas.drawLine(-40, mCenterY, width = 100, mCenterY, mTickPaint);
-                }
+            /*for (int i = 12; i < 24; ++i) {
+                if (i % 3 != 0) {{
+                    float tickRot = (float) (i * Math.PI * 2 / 12);
+                    float innerX = (float) Math.sin(tickRot) * innerTickRadius;
+                    float innerY = (float) -Math.cos(tickRot) * innerTickRadius;
+                    float outerX = (float) Math.sin(tickRot) * mCenterX;
+                    float outerY = (float) -Math.cos(tickRot) * mCenterX;
+                    canvas.drawLine(mCenterX + innerX, mCenterY + innerY, mCenterX + outerX, mCenterY + outerY, mTickPaint);
+                }}
 
                 //canvas.rotate(30f, mCenterX, mCenterY);
-            }*/
+            }
             //canvas.restore();
             /**if (mRound) {
                 canvas.drawCircle(mCenterX, mCenterY, mCenterX-32, mBlackFIllPaint)
@@ -410,7 +459,18 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
 
 
             //WatchBattery
-            canvas.drawText(batteryPercentage,mCenterX-100f, mCenterY+5f, BatteryPercentagePaint);
+            canvas.drawText("Watch Battery", mCenterX - 120f, mCenterY - 20f, BatteryPercentagePaint);
+            canvas.drawText(batteryPercentage, mCenterX - 90f, mCenterY + 5f, BatteryPercentagePaint);
+
+            //Date
+            String ts2 = String.format("%02d",
+                    mTime.monthDay);
+            canvas.drawText(ts2, mCenterX + 80f, mCenterY + 5f, mDate);
+
+
+
+
+
 
             // save the canvas state before we begin to rotate it
             canvas.save();
