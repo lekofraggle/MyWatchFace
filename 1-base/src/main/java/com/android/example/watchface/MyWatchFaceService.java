@@ -75,6 +75,7 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
             /*implements SensorEventListener*/ {
         /* Handler to update the time once a second in interactimplements
             SensorEventListener ive mode. */
+
         private final Handler mUpdateTimeHandler = new Handler() {
             @Override
             public void handleMessage(Message message) {

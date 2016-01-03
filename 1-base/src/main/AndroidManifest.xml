@@ -32,7 +32,7 @@
         tools:ignore="MissingApplicationIcon">
         <service
             android:name=".MyWatchFaceService"
-            android:label="@string/my_analog_name"
+            android:label="#AnalogWatchface"
             android:permission="android.permission.BIND_WALLPAPER" >
             <meta-data
                 android:name="android.service.wallpaper"
