@@ -376,6 +376,9 @@ public class MyWatchFaceService extends CanvasWatchFaceService {
              * time, e.g. 360 / 60 = 6 and 360 / 12 = 30
              */
             final float secondsRotation = mTime.second * 6f;
+             //create smooth minutes
+            final float minuteHandOffset = mTime.second / 10f;
+            final float minutesRotation = (mTime.minute * 6f) + minuteHandOffset;
             final float minutesRotation = mTime.minute * 6f;
             // account for the offset of the hour hand due to minutes of the hour.
             final float hourHandOffset = mTime.minute / 2f;
